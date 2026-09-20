@@ -1,785 +1,799 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>BlueMoon Life App</title>
-
-<style>
-*{box-sizing:border-box}
-body{
- margin:0;
- font-family:Arial,"Noto Sans Thai",sans-serif;
- background:linear-gradient(135deg,#07152f,#35106b);
- color:#fff;
- min-height:100vh;
-}
-button,input,textarea{font:inherit}
-button{
- border:0;
- border-radius:12px;
- padding:11px 16px;
- color:#fff;
- background:linear-gradient(135deg,#5264ff,#9b45ff);
- cursor:pointer;
-}
-button:hover{opacity:.85}
-input,textarea{
- width:100%;
- background:#101a3b;
- color:#fff;
- border:1px solid #ffffff22;
- border-radius:12px;
- padding:12px;
- margin:6px 0;
-}
-textarea{min-height:100px;resize:vertical}
-
-.layout{display:flex;min-height:100vh}
-.sidebar{
- position:fixed;
- width:240px;
- height:100vh;
- padding:20px;
- background:#080d20eF;
- border-right:1px solid #ffffff15;
- z-index:5;
-}
-.logo{
- font-size:25px;
- font-weight:bold;
- text-align:center;
- margin:8px 0 25px;
-}
-.logo span{color:#a276ff}
-
-.menu button{
- width:100%;
- text-align:left;
- background:transparent;
- margin:3px 0;
-}
-.menu button.active,
-.menu button:hover{
- background:linear-gradient(90deg,#4f54e9,#9147e9);
-}
-
-.main{
- margin-left:240px;
- width:calc(100% - 240px);
- padding:20px;
- max-width:1400px;
-}
-.topbar{
- display:flex;
- justify-content:space-between;
- align-items:center;
- margin-bottom:20px;
-}
-.card{
- background:#ffffff0d;
- border:1px solid #ffffff14;
- border-radius:20px;
- padding:20px;
- margin-bottom:18px;
- backdrop-filter:blur(12px);
-}
-.grid{
- display:grid;
- grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
- gap:15px;
-}
-.stat{
- padding:20px;
- border-radius:18px;
- background:linear-gradient(135deg,#3150c8,#763ed0);
-}
-.stat h2{font-size:30px;margin:8px 0}
-
-.page{display:none}
-.page.active{display:block}
-
-.item{
- background:#ffffff0b;
- padding:14px;
- border-radius:13px;
- margin:8px 0;
- display:flex;
- align-items:center;
- justify-content:space-between;
- gap:10px;
-}
-.item.done span{text-decoration:line-through;opacity:.45}
-
-.chatbox{
- height:350px;
- overflow:auto;
- padding:10px;
- background:#070d20;
- border-radius:15px;
-}
-.message{
- max-width:75%;
- background:#293154;
- padding:10px 14px;
- border-radius:15px;
- margin:8px 0;
-}
-.message.me{
- margin-left:auto;
- background:#654cf0;
-}
-
-.avatar{
- width:65px;
- height:65px;
- border-radius:50%;
- display:flex;
- align-items:center;
- justify-content:center;
- background:linear-gradient(135deg,#5160ff,#a247ff);
- font-size:30px;
-}
-.profile{
- display:flex;
- align-items:center;
- gap:15px;
-}
-
-.mobile{
- display:none;
-}
-
-.light{
- background:linear-gradient(135deg,#eef3ff,#eee5ff);
- color:#17172b;
-}
-.light .sidebar{background:#ffffffee}
-.light .card{background:#ffffffaa}
-.light input,.light textarea{background:#fff;color:#111}
-.light .chatbox{background:#e7e9f5}
-.light .message{background:#d4d7eb}
-
-@media(max-width:700px){
- .sidebar{display:none}
- .sidebar.open{display:block}
- .main{
-   margin-left:0;
-   width:100%;
-   padding:12px;
- }
- .mobile{display:block}
-}
-</style>
-</head>
-
-<body>
-
-<div class="layout">
-
-<aside class="sidebar" id="sidebar">
- <div class="logo">💙 Blue<span>Moon</span></div>
-
- <div class="menu">
-  <button class="active" onclick="page('home',this)">🏠 หน้าหลัก</button>
-  <button onclick="page('chat',this)">💬 แชต</button>
-  <button onclick="page('friends',this)">👥 เพื่อน</button>
-  <button onclick="page('todo',this)">✅ งาน</button>
-  <button onclick="page('notes',this)">📝 โน้ต</button>
-  <button onclick="page('calendar',this)">📅 ปฏิทิน</button>
-  <button onclick="page('countdown',this)">⏳ Countdown</button>
-  <button onclick="page('location',this)">📍 ตำแหน่ง</button>
-  <button onclick="page('device',this)">🔋 อุปกรณ์</button>
-  <button onclick="page('game',this)">🎮 เกม</button>
-  <button onclick="page('profile',this)">👤 โปรไฟล์</button>
-  <button onclick="theme()">🌙 เปลี่ยนธีม</button>
- </div>
-</aside>
-
-<main class="main">
-
-<div class="topbar">
- <button class="mobile" onclick="menu()">☰</button>
- <h1 id="title">หน้าหลัก</h1>
- <span id="clock"></span>
-</div>
-
-<!-- HOME -->
-<section id="home" class="page active">
-
-<div class="card">
- <div class="profile">
-  <div class="avatar">👤</div>
-  <div>
-   <h2 id="welcome">สวัสดี 👋</h2>
-   <p>ยินดีต้อนรับเข้าสู่ BlueMoon</p>
-  </div>
- </div>
-</div>
-
-<div class="grid">
- <div class="stat">💬 ข้อความ<h2 id="messages">0</h2></div>
- <div class="stat">👥 เพื่อน<h2 id="friends">0</h2></div>
- <div class="stat">✅ งานค้าง<h2 id="tasks">0</h2></div>
- <div class="stat">⭐ คะแนน<h2 id="score">0</h2></div>
-</div>
-
-</section>
-
-<!-- CHAT -->
-<section id="chat" class="page">
-<div class="card">
-<h2>💬 แชต</h2>
-
-<div class="chatbox" id="chatbox"></div>
-
-<input id="chatInput" placeholder="พิมพ์ข้อความ...">
-<button onclick="send()">ส่ง</button>
-<button onclick="clearChat()">ล้างแชต</button>
-</div>
-</section>
-
-<!-- FRIENDS -->
-<section id="friends" class="page">
-<div class="card">
-<h2>👥 เพื่อน</h2>
-<input id="friendInput" placeholder="ชื่อเพื่อน">
-<button onclick="addFriend()">เพิ่มเพื่อน</button>
-<div id="friendList"></div>
-</div>
-</section>
-
-<!-- TODO -->
-<section id="todo" class="page">
-<div class="card">
-<h2>✅ To-do List</h2>
-<input id="todoInput" placeholder="งานที่ต้องทำ">
-<button onclick="addTodo()">เพิ่มงาน</button>
-<div id="todoList"></div>
-</div>
-</section>
-
-<!-- NOTES -->
-<section id="notes" class="page">
-<div class="card">
-<h2>📝 โน้ต</h2>
-<input id="noteTitle" placeholder="หัวข้อ">
-<textarea id="noteText" placeholder="รายละเอียด"></textarea>
-<button onclick="addNote()">บันทึก</button>
-<div id="noteList"></div>
-</div>
-</section>
-
-<!-- CALENDAR -->
-<section id="calendar" class="page">
-<div class="card">
-<h2>📅 ปฏิทินกิจกรรม</h2>
-<input type="date" id="eventDate">
-<input id="eventText" placeholder="ชื่อกิจกรรม">
-<button onclick="addEvent()">เพิ่มกิจกรรม</button>
-<div id="eventList"></div>
-</div>
-</section>
-
-<!-- COUNTDOWN -->
-<section id="countdown" class="page">
-<div class="card">
-<h2>⏳ Countdown</h2>
-<input type="datetime-local" id="targetDate">
-<button onclick="startCountdown()">เริ่ม</button>
-<h1 id="timer">00:00:00</h1>
-</div>
-</section>
-
-<!-- LOCATION -->
-<section id="location" class="page">
-<div class="card">
-<h2>📍 ตำแหน่งของฉัน</h2>
-<p>กดปุ่มเพื่อขอสิทธิ์ตำแหน่งจากเบราว์เซอร์</p>
-<button onclick="locationGPS()">เปิดตำแหน่ง</button>
-<p id="gpsResult"></p>
-</div>
-</section>
-
-<!-- DEVICE -->
-<section id="device" class="page">
-<div class="card">
-<h2>🔋 ข้อมูลอุปกรณ์</h2>
-<p id="battery">กำลังตรวจสอบแบตเตอรี่...</p>
-<p>📱 หน้าจอ: <span id="screen"></span></p>
-<p>🌐 เบราว์เซอร์: <span id="browser"></span></p>
-<p>🕐 เวลา: <span id="deviceClock"></span></p>
-</div>
-</section>
-
-<!-- GAME -->
-<section id="game" class="page">
-<div class="card">
-<h2>🎮 เกมทายเลข</h2>
-<p>ทายเลข 1–10</p>
-<input id="guess" type="number" min="1" max="10">
-<button onclick="guess()">ทาย</button>
-<h3 id="gameResult"></h3>
-</div>
-
-<div class="card">
-<h2>⭐ คะแนนของคุณ</h2>
-<h1 id="gameScore">0</h1>
-</div>
-</section>
-
-<!-- PROFILE -->
-<section id="profile" class="page">
-<div class="card">
-<h2>👤 โปรไฟล์</h2>
-
-<input id="name" placeholder="ชื่อ">
-<input id="status" placeholder="สถานะ">
-
-<button onclick="saveProfile()">บันทึก</button>
-
-<div id="profileResult"></div>
-</div>
-</section>
-
-</main>
-</div>
-
-<script>
-
-/* DATABASE LOCAL */
-const get=(key,def=[]) =>
- JSON.parse(localStorage.getItem(key)||JSON.stringify(def));
-
-let friends=get("friends",[]);
-let todos=get("todos",[]);
-let notes=get("notes",[]);
-let events=get("events",[]);
-let chat=get("chat",[]);
-let score=Number(localStorage.getItem("score")||0);
-
-/* NAVIGATION */
-function page(id,btn){
- document.querySelectorAll(".page")
- .forEach(x=>x.classList.remove("active"));
-
- document.getElementById(id).classList.add("active");
-
- document.querySelectorAll(".menu button")
- .forEach(x=>x.classList.remove("active"));
-
- if(btn)btn.classList.add("active");
-
- document.getElementById("title").textContent=btn
- ? btn.textContent.replace(/^.{2}/,"")
- : id;
-
- document.getElementById("sidebar").classList.remove("open");
-}
-
-function menu(){
- document.getElementById("sidebar").classList.toggle("open");
-}
-
-function theme(){
- document.body.classList.toggle("light");
- localStorage.setItem(
-  "theme",
-  document.body.classList.contains("light")?"light":"dark"
- );
-}
-
-if(localStorage.getItem("theme")==="light")
- document.body.classList.add("light");
-
-/* CHAT */
-function send(){
- const input=document.getElementById("chatInput");
- const text=input.value.trim();
-
- if(!text)return;
-
- chat.push({
-  text:text,
-  time:new Date().toLocaleTimeString("th-TH")
- });
-
- localStorage.setItem("chat",JSON.stringify(chat));
-
- input.value="";
- renderChat();
-}
-
-function renderChat(){
- const box=document.getElementById("chatbox");
-
- box.innerHTML=chat.map(x=>`
- <div class="message me">
- ${safe(x.text)}
- <small>${x.time}</small>
- </div>
- `).join("");
-
- document.getElementById("messages").textContent=chat.length;
-}
-
-function clearChat(){
- if(confirm("ล้างข้อความทั้งหมด?")){
-  chat=[];
-  localStorage.setItem("chat","[]");
-  renderChat();
- }
-}
-
-/* FRIENDS */
-function addFriend(){
- const input=document.getElementById("friendInput");
- const name=input.value.trim();
-
- if(!name)return;
-
- friends.push(name);
- localStorage.setItem("friends",JSON.stringify(friends));
-
- input.value="";
- renderFriends();
-}
-
-function renderFriends(){
- document.getElementById("friendList").innerHTML=
- friends.map((x,i)=>`
- <div class="item">
- <span>👤 ${safe(x)}</span>
- <button onclick="removeFriend(${i})">ลบ</button>
- </div>
- `).join("");
-
- document.getElementById("friends").textContent=friends.length;
-}
-
-function removeFriend(i){
- friends.splice(i,1);
- localStorage.setItem("friends",JSON.stringify(friends));
- renderFriends();
-}
-
-/* TODO */
-function addTodo(){
- const input=document.getElementById("todoInput");
- const text=input.value.trim();
-
- if(!text)return;
-
- todos.push({
-  text:text,
-  done:false
- });
-
- localStorage.setItem("todos",JSON.stringify(todos));
-
- input.value="";
- renderTodos();
-}
-
-function renderTodos(){
- document.getElementById("todoList").innerHTML=
- todos.map((x,i)=>`
- <div class="item ${x.done?"done":""}">
- <span>☑️ ${safe(x.text)}</span>
- <div>
- <button onclick="doneTodo(${i})">✓</button>
- <button onclick="removeTodo(${i})">ลบ</button>
- </div>
- </div>
- `).join("");
-
- document.getElementById("tasks").textContent=
- todos.filter(x=>!x.done).length;
-}
-
-function doneTodo(i){
- todos[i].done=!todos[i].done;
- localStorage.setItem("todos",JSON.stringify(todos));
- renderTodos();
-}
-
-function removeTodo(i){
- todos.splice(i,1);
- localStorage.setItem("todos",JSON.stringify(todos));
- renderTodos();
-}
-
-/* NOTES */
-function addNote(){
- const title=document.getElementById("noteTitle").value.trim();
- const text=document.getElementById("noteText").value.trim();
-
- if(!title&&!text)return;
-
- notes.push({title,text});
-
- localStorage.setItem("notes",JSON.stringify(notes));
-
- document.getElementById("noteTitle").value="";
- document.getElementById("noteText").value="";
-
- renderNotes();
-}
-
-function renderNotes(){
- document.getElementById("noteList").innerHTML=
- notes.map((x,i)=>`
- <div class="card">
- <h3>${safe(x.title)}</h3>
- <p>${safe(x.text)}</p>
- <button onclick="removeNote(${i})">ลบ</button>
- </div>
- `).join("");
-}
-
-function removeNote(i){
- notes.splice(i,1);
- localStorage.setItem("notes",JSON.stringify(notes));
- renderNotes();
-}
-
-/* EVENTS */
-function addEvent(){
- const date=document.getElementById("eventDate").value;
- const text=document.getElementById("eventText").value.trim();
-
- if(!date||!text)return;
-
- events.push({date,text});
-
- localStorage.setItem("events",JSON.stringify(events));
-
- document.getElementById("eventText").value="";
-
- renderEvents();
-}
-
-function renderEvents(){
- document.getElementById("eventList").innerHTML=
- events.map((x,i)=>`
- <div class="item">
- <span>📅 ${x.date} — ${safe(x.text)}</span>
- <button onclick="removeEvent(${i})">ลบ</button>
- </div>
- `).join("");
-}
-
-function removeEvent(i){
- events.splice(i,1);
- localStorage.setItem("events",JSON.stringify(events));
- renderEvents();
-}
-
-/* COUNTDOWN */
-let countdownInterval;
-
-function startCountdown(){
-
- clearInterval(countdownInterval);
-
- const target=new Date(
-  document.getElementById("targetDate").value
- ).getTime();
-
- if(!target)return;
-
- function update(){
-
-  const diff=target-Date.now();
-
-  if(diff<=0){
-   document.getElementById("timer").textContent="หมดเวลา 🎉";
-   clearInterval(countdownInterval);
-   return;
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Heart, MapPin, Battery, BatteryCharging, Calendar, DollarSign, Gamepad2, 
+  Navigation, Bell, Send, Sparkles, ShieldCheck, Clock, Plus, Utensils, 
+  Film, CheckCircle2, MessageSquare, User, Settings, Lock, Moon, Sun, 
+  Paperclip, Image, Smile, Pin, Search, Trash2, Eye, EyeOff, Trophy, 
+  Gift, ListTodo, FileText, Smartphone, Power, LogOut, CheckSquare, 
+  Radio, AlertTriangle, ChevronRight, Menu, X, Share2, Shield, MoreVertical
+} from 'lucide-react';
+
+export default function CoupleAppMaster() {
+  // --- 10. UI & Global States ---
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [accentColor, setAccentColor] = useState('violet'); // 'violet' | 'cyan' | 'indigo'
+  const [isAppLocked, setIsAppLocked] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [appPin, setAppPin] = useState('1234');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // --- 1. User Profile State ---
+  const [user, setUser] = useState({
+    name: 'น้องบลู',
+    email: 'blue@couple.app',
+    bio: 'รักเธอทุกวัน 💙💜',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    theme: 'Dark Violet',
+    privacy: { locationSharing: true, showBattery: true, showStatus: true }
+  });
+
+  const [partner, setPartner] = useState({
+    name: 'พี่ไวโอเล็ต',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    status: 'กำลังทำงาน 💻',
+    isOnline: true,
+    lastSeen: 'เมื่อสักครู่',
+    location: 'สยามพารากอน, กรุงเทพฯ',
+    battery: 84,
+    isCharging: true,
+    lat: 13.746,
+    lng: 100.534
+  });
+
+  // --- 8. Gamification & Points State ---
+  const [coins, setCoins] = useState(1250);
+  const [level, setLevel] = useState(5);
+  const [dailyCheckin, setDailyCheckin] = useState(false);
+
+  // --- 9. Notification System ---
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'แบตเตอรี่ต่ำ', body: 'แบตเตอรี่ของพี่ไวโอเล็ตเหลือ 15%', time: '10 นาทีที่แล้ว', type: 'battery' },
+    { id: 2, title: 'ใกล้ถึงวันสำคัญ', body: 'อีก 3 วันจะถึงวันครบรอบ 3 ปี! 💖', time: '1 ชม. ที่แล้ว', type: 'event' }
+  ]);
+  const [unreadCount, setUnreadCount] = useState(2);
+
+  // Dynamic Theme Colors Class
+  const accentGradient = accentColor === 'violet' 
+    ? 'from-blue-600 to-violet-600' 
+    : accentColor === 'cyan' 
+    ? 'from-cyan-600 to-blue-600' 
+    : 'from-indigo-600 to-purple-600';
+
+  const accentText = accentColor === 'violet' 
+    ? 'text-violet-400' 
+    : accentColor === 'cyan' 
+    ? 'text-cyan-400' 
+    : 'text-indigo-400';
+
+  const accentBg = accentColor === 'violet' 
+    ? 'bg-violet-600' 
+    : accentColor === 'cyan' 
+    ? 'bg-cyan-600' 
+    : 'bg-indigo-600';
+
+  // Security Lock Check
+  if (isAppLocked) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-slate-950 text-slate-100 p-6">
+        <div className="p-4 rounded-full bg-violet-600/20 text-violet-400 mb-4 animate-bounce">
+          <Lock className="w-10 h-10" />
+        </div>
+        <h2 className="text-xl font-bold mb-2">UsSpace Locked</h2>
+        <p className="text-xs text-slate-400 mb-6">กรุณากรอกรหัส PIN เพื่อเข้าสู่ระบบ (Default: 1234)</p>
+        
+        <div className="flex gap-3 mb-6">
+          {[0, 1, 2, 3].map((idx) => (
+            <div 
+              key={idx} 
+              className={`w-4 h-4 rounded-full border border-violet-400 transition-all ${
+                pinInput.length > idx ? 'bg-violet-500 scale-110' : 'bg-transparent'
+              }`} 
+            />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 max-w-xs w-full">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 'C', 0, '🔓'].map((num, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                if (num === 'C') setPinInput('');
+                else if (num === '🔓') {
+                  if (pinInput === appPin) setIsAppLocked(false);
+                  else alert('PIN ไม่ถูกต้อง!');
+                } else if (pinInput.length < 4) {
+                  const newInput = pinInput + num;
+                  setPinInput(newInput);
+                  if (newInput === appPin) setIsAppLocked(false);
+                }
+              }}
+              className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-lg font-bold hover:bg-slate-800 text-slate-200 active:scale-95 transition-all flex items-center justify-center"
+            >
+              {num}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
   }
 
-  const d=Math.floor(diff/86400000);
-  const h=Math.floor(diff%86400000/3600000);
-  const m=Math.floor(diff%3600000/60000);
-  const s=Math.floor(diff%60000/1000);
+  return (
+    <div className={`flex h-screen w-full ${isDarkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'} font-sans relative overflow-hidden`}>
+      
+      {/* Background Glow Overlay */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-600/15 rounded-full blur-[120px] pointer-events-none" />
 
-  document.getElementById("timer").textContent=
-   `${d} วัน ${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
- }
+      {/* Sidebar for Desktop & Mobile Overlay */}
+      <aside className={`fixed md:relative z-40 h-full w-64 ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'} border-r backdrop-blur-xl transition-all duration-300 flex flex-col justify-between ${isSidebarOpen ? 'left-0' : '-left-64 md:left-0'}`}>
+        <div>
+          {/* Logo */}
+          <div className="p-6 flex items-center justify-between">
+            <h1 className={`text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r ${accentGradient} flex items-center gap-2`}>
+              UsSpace <Heart className="w-6 h-6 text-violet-400 fill-violet-400 animate-pulse" />
+            </h1>
+            <button className="md:hidden" onClick={() => setIsSidebarOpen(false)}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
- update();
- countdownInterval=setInterval(update,1000);
+          {/* Quick User Card */}
+          <div className="px-4 mb-6">
+            <div className={`p-3 rounded-2xl ${isDarkMode ? 'bg-slate-800/50 border-slate-700/50' : 'bg-slate-100 border-slate-200'} border flex items-center gap-3`}>
+              <img src={user.avatar} className="w-10 h-10 rounded-full object-cover ring-2 ring-violet-500/50" />
+              <div className="flex-1 overflow-hidden">
+                <p className="text-xs font-bold truncate">{user.name}</p>
+                <p className="text-[10px] text-emerald-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> ออนไลน์
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="px-3 space-y-1">
+            <SidebarItem icon={<Heart />} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }} accentText={accentText} />
+            <SidebarItem icon={<MessageSquare />} label="แชตคู่รัก (Chat)" active={activeTab === 'chat'} onClick={() => { setActiveTab('chat'); setIsSidebarOpen(false); }} accentText={accentText} />
+            <SidebarItem icon={<MapPin />} label="พิกัด & แบตเตอรี่" active={activeTab === 'location'} onClick={() => { setActiveTab('location'); setIsSidebarOpen(false); }} accentText={accentText} />
+            <SidebarItem icon={<Calendar />} label="ตาราง & กิจกรรม" active={activeTab === 'calendar'} onClick={() => { setActiveTab('calendar'); setIsSidebarOpen(false); }} accentText={accentText} />
+            <SidebarItem icon={<FileText />} label="สมุดโน้ตคู่รัก" active={activeTab === 'notes'} onClick={() => { setActiveTab('notes'); setIsSidebarOpen(false); }} accentText={accentText} />
+            <SidebarItem icon={<Gamepad2 />} label="มินิเกม & ภารกิจ" active={activeTab === 'games'} onClick={() => { setActiveTab('games'); setIsSidebarOpen(false); }} accentText={accentText} />
+            <SidebarItem icon={<Settings />} label="ตั้งค่า & ความปลอดภัย" active={activeTab === 'settings'} onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} accentText={accentText} />
+          </nav>
+        </div>
+
+        {/* Quick Lock / Logout Footer */}
+        <div className="p-4 border-t border-slate-800/50 flex justify-between items-center text-xs text-slate-400">
+          <button onClick={() => setIsAppLocked(true)} className="flex items-center gap-1.5 hover:text-white transition-all">
+            <Lock className="w-4 h-4 text-violet-400" /> ล็อกแอป
+          </button>
+          <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-xl bg-slate-800/50">
+            {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        
+        {/* Top Header */}
+        <header className={`px-4 py-3 border-b ${isDarkMode ? 'bg-slate-900/60 border-slate-800/80' : 'bg-white/80 border-slate-200'} backdrop-blur-md flex justify-between items-center z-20`}>
+          <div className="flex items-center gap-3">
+            <button className="md:hidden p-2 rounded-xl bg-slate-800/50" onClick={() => setIsSidebarOpen(true)}>
+              <Menu className="w-5 h-5" />
+            </button>
+            <div>
+              <h2 className="text-sm font-bold capitalize">{activeTab}</h2>
+              <p className="text-[10px] text-slate-400">สถานะ: เชื่อมต่อกับ {partner.name} แล้ว 💖</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Coin Badge */}
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold">
+              <Trophy className="w-3.5 h-3.5" /> {coins} เหรียญ
+            </div>
+
+            {/* Notification Bell */}
+            <div className="relative">
+              <button 
+                onClick={() => setUnreadCount(0)}
+                className={`p-2 rounded-xl ${isDarkMode ? 'bg-slate-800/80 border-slate-700/60' : 'bg-slate-100 border-slate-300'} border relative text-slate-300 hover:text-white`}
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-violet-500 text-[10px] font-bold text-white rounded-full flex items-center justify-center animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Dynamic Body Content */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 max-w-5xl mx-auto w-full">
+          {activeTab === 'dashboard' && <DashboardView user={user} partner={partner} accentGradient={accentGradient} coins={coins} setCoins={setCoins} />}
+          {activeTab === 'chat' && <ChatView partner={partner} user={user} accentBg={accentBg} />}
+          {activeTab === 'location' && <LocationView partner={partner} user={user} />}
+          {activeTab === 'calendar' && <CalendarView accentBg={accentBg} />}
+          {activeTab === 'notes' && <NotesView accentBg={accentBg} />}
+          {activeTab === 'games' && <GamesView coins={coins} setCoins={setCoins} level={level} setLevel={setLevel} />}
+          {activeTab === 'settings' && <SettingsView user={user} setUser={setUser} accentColor={accentColor} setAccentColor={setAccentColor} appPin={appPin} setAppPin={setAppPin} />}
+        </main>
+
+        {/* Mobile Bottom Navigation Bar */}
+        <nav className={`md:hidden px-2 py-2 ${isDarkMode ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'} border-t backdrop-blur-lg flex justify-around items-center z-30`}>
+          <NavBtn icon={<Heart />} label="หน้าหลัก" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} accentText={accentText} />
+          <NavBtn icon={<MessageSquare />} label="แชต" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} accentText={accentText} />
+          <NavBtn icon={<MapPin />} label="พิกัด" active={activeTab === 'location'} onClick={() => setActiveTab('location')} accentText={accentText} />
+          <NavBtn icon={<Calendar />} label="กิจกรรม" active={activeTab === 'calendar'} onClick={() => setActiveTab('calendar')} accentText={accentText} />
+          <NavBtn icon={<Settings />} label="ตั้งค่า" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} accentText={accentText} />
+        </nav>
+
+      </div>
+    </div>
+  );
 }
 
-/* GPS */
-function locationGPS(){
-
- const result=document.getElementById("gpsResult");
-
- if(!navigator.geolocation){
-  result.textContent="เบราว์เซอร์ไม่รองรับ GPS";
-  return;
- }
-
- result.textContent="กำลังขอสิทธิ์ตำแหน่ง...";
-
- navigator.geolocation.getCurrentPosition(
-  position=>{
-   result.innerHTML=
-   `📍 Latitude: ${position.coords.latitude.toFixed(5)}
-   <br>
-   📍 Longitude: ${position.coords.longitude.toFixed(5)}
-   <br>
-   🎯 ความแม่นยำประมาณ ${Math.round(position.coords.accuracy)} เมตร`;
-  },
-  error=>{
-   result.textContent="ไม่สามารถเข้าถึงตำแหน่งได้";
-  }
- );
+// Helpers Components
+function SidebarItem({ icon, label, active, onClick, accentText }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+        active 
+          ? 'bg-violet-600/15 border border-violet-500/30 text-white shadow-sm' 
+          : 'text-slate-400 hover:bg-slate-800/40 hover:text-slate-200'
+      }`}
+    >
+      {React.cloneElement(icon, { className: `w-4 h-4 ${active ? accentText : ''}` })}
+      {label}
+    </button>
+  );
 }
 
-/* DEVICE */
-async function battery(){
-
- if(!navigator.getBattery){
-  document.getElementById("battery").textContent=
-   "🔋 เบราว์เซอร์ไม่รองรับข้อมูลแบตเตอรี่";
-  return;
- }
-
- try{
-  const b=await navigator.getBattery();
-
-  function update(){
-   document.getElementById("battery").textContent=
-   `🔋 แบตเตอรี่ ${Math.round(b.level*100)}%
-   ${b.charging?"⚡ กำลังชาร์จ":"🔌 ไม่ได้ชาร์จ"}`;
-  }
-
-  update();
-
-  b.addEventListener("levelchange",update);
-  b.addEventListener("chargingchange",update);
-
- }catch{
-  document.getElementById("battery").textContent=
-   "ไม่สามารถอ่านข้อมูลแบตเตอรี่ได้";
- }
+function NavBtn({ icon, label, active, onClick, accentText }) {
+  return (
+    <button 
+      onClick={onClick} 
+      className={`flex flex-col items-center gap-0.5 p-1 transition-all ${active ? `${accentText} scale-110 font-bold` : 'text-slate-400'}`}
+    >
+      {React.cloneElement(icon, { className: 'w-5 h-5' })}
+      <span className="text-[9px]">{label}</span>
+    </button>
+  );
 }
 
-/* GAME */
-function guess(){
+// ==========================================
+// 10. UI & 1. USER PROFILE - DASHBOARD PAGE
+// ==========================================
+function DashboardView({ user, partner, accentGradient, coins, setCoins }) {
+  const [mood, setMood] = useState('😊');
+  const [loveDays] = useState(1314); // 1314 วัน = ความหมายรักเธอนิรันดร์
 
- const value=Number(document.getElementById("guess").value);
+  return (
+    <div className="space-y-6">
+      {/* Top Banner Counter */}
+      <div className={`p-6 md:p-8 rounded-3xl bg-gradient-to-r ${accentGradient} text-white shadow-xl relative overflow-hidden`}>
+        <div className="absolute right-0 top-0 translate-x-10 -translate-y-10 w-60 h-60 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+        
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <img src={user.avatar} className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-white/80 shadow-md" />
+              <span className="absolute bottom-0 right-0 text-sm bg-slate-900 rounded-full px-1">{mood}</span>
+            </div>
+            <Heart className="w-6 h-6 text-pink-300 fill-pink-300 animate-ping" />
+            <div className="relative">
+              <img src={partner.avatar} className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-white/80 shadow-md" />
+              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 border-2 border-slate-900 rounded-full" />
+            </div>
+          </div>
 
- if(value<1||value>10){
-  document.getElementById("gameResult").textContent=
-   "กรุณาใส่เลข 1–10";
-  return;
- }
+          <div className="text-right">
+            <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold">
+              ระดับความหวาน 99.9% 💖
+            </span>
+          </div>
+        </div>
 
- const answer=Math.floor(Math.random()*10)+1;
+        <div>
+          <p className="text-xs text-blue-100/80 uppercase tracking-wider font-semibold">เราสองคนรักกันมาแล้ว</p>
+          <h1 className="text-4xl md:text-5xl font-black mt-1 tracking-tight">
+            {loveDays} <span className="text-xl font-normal opacity-90">วัน</span>
+          </h1>
+        </div>
+      </div>
 
- if(value===answer){
+      {/* Grid Quick Stats & Device Status */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Partner Device & Location Widget (4. Battery & Status) */}
+        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+              <Smartphone className="w-4 h-4 text-violet-400" /> สถานะแฟน ({partner.name})
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold">
+              {partner.isOnline ? 'ออนไลน์อยู่' : 'ออฟไลน์'}
+            </span>
+          </div>
 
-  score+=10;
+          <div className="flex items-center justify-between pt-1">
+            <div className="space-y-0.5">
+              <p className="text-sm font-semibold text-slate-200">{partner.location}</p>
+              <p className="text-[11px] text-slate-400">สถานะ: {partner.status}</p>
+            </div>
+            <div className="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/60">
+              {partner.isCharging ? <BatteryCharging className="w-4 h-4 text-emerald-400" /> : <Battery className="w-4 h-4 text-amber-400" />}
+              <span className="text-xs font-bold text-slate-200">{partner.battery}%</span>
+            </div>
+          </div>
+        </div>
 
-  document.getElementById("gameResult").textContent=
-   `🎉 ถูกต้อง! เลขคือ ${answer} +10 คะแนน`;
+        {/* Daily Mood Selector */}
+        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+          <span className="text-xs font-bold text-slate-400">แชร์อารมณ์ของคุณวันนี้ให้แฟนรู้</span>
+          <div className="flex justify-around items-center pt-2">
+            {['😊', '🥰', '🥺', '😴', '😤', '💖'].map((e) => (
+              <button 
+                key={e} 
+                onClick={() => setMood(e)} 
+                className={`text-2xl p-2 rounded-2xl transition-all ${mood === e ? 'bg-violet-600/30 border border-violet-500 scale-125' : 'hover:bg-slate-800'}`}
+              >
+                {e}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
- }else{
-
-  document.getElementById("gameResult").textContent=
-   `❌ ไม่ถูก เลขที่สุ่มคือ ${answer}`;
-
- }
-
- localStorage.setItem("score",score);
-
- updateScore();
+      {/* Love Nudge Quick Action */}
+      <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-violet-600/20 text-violet-400 rounded-xl">
+            <Radio className="w-5 h-5 animate-pulse" />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-slate-200">ส่ง Love Ping ถึงแฟน</p>
+            <p className="text-[10px] text-slate-400">ส่งการแจ้งเตือนสั่นสะเทือนแบบด่วนไปที่มือถือแฟน</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => { alert('ส่งความคิดถึงให้แฟนแล้ว! ❤️'); setCoins(coins + 10); }}
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 text-xs font-bold hover:opacity-90 active:scale-95 transition-all shadow-md"
+        >
+          ส่งเลย (+10 เหรียญ)
+        </button>
+      </div>
+    </div>
+  );
 }
 
-function updateScore(){
- document.getElementById("score").textContent=score;
- document.getElementById("gameScore").textContent=score;
+// ==========================================
+// 2. CHAT SYSTEM - FULL CHAT PAGE
+// ==========================================
+function ChatView({ partner, user, accentBg }) {
+  const [messages, setMessages] = useState([
+    { id: 1, sender: 'partner', text: 'มอนิ่งครับตื่นยังเอ่ย? ❤️', time: '08:30 น.', isPinned: true },
+    { id: 2, sender: 'me', text: 'ตื่นแล้วค่า กำลังจะกินข้าวเช้า 🍳', time: '08:32 น.', isPinned: false },
+    { id: 3, sender: 'partner', text: 'อย่าลืมกินยาลดไข้ด้วยน้า เป็นห่วงนะครับ', time: '08:33 น.', isPinned: false },
+  ]);
+  const [inputText, setInputText] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSend = () => {
+    if (!inputText.trim()) return;
+    setMessages([...messages, {
+      id: Date.now(),
+      sender: 'me',
+      text: inputText,
+      time: 'เมื่อสักครู่',
+      isPinned: false
+    }]);
+    setInputText('');
+  };
+
+  const togglePin = (id) => {
+    setMessages(messages.map(m => m.id === id ? { ...m, isPinned: !m.isPinned } : m));
+  };
+
+  const deleteMsg = (id) => {
+    setMessages(messages.filter(m => m.id !== id));
+  };
+
+  const filteredMessages = messages.filter(m => m.text.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  return (
+    <div className="h-[calc(100vh-140px)] flex flex-col rounded-3xl bg-slate-900/80 border border-slate-800 overflow-hidden backdrop-blur-md">
+      {/* Chat Topbar */}
+      <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
+        <div className="flex items-center gap-3">
+          <img src={partner.avatar} className="w-10 h-10 rounded-full object-cover ring-2 ring-violet-500/40" />
+          <div>
+            <h3 className="text-xs font-bold text-slate-200">{partner.name}</h3>
+            <p className="text-[10px] text-emerald-400 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> กำลังพิมพ์...
+            </p>
+          </div>
+        </div>
+
+        {/* Search Msg */}
+        <div className="relative w-36 md:w-48">
+          <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" />
+          <input 
+            type="text" 
+            placeholder="ค้นหาข้อความ..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-slate-800/80 border border-slate-700/60 rounded-xl pl-8 pr-3 py-1 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
+          />
+        </div>
+      </div>
+
+      {/* Pinned Message Bar */}
+      {messages.some(m => m.isPinned) && (
+        <div className="px-4 py-2 bg-violet-950/30 border-b border-violet-500/20 flex items-center justify-between text-xs text-violet-300">
+          <div className="flex items-center gap-2 truncate">
+            <Pin className="w-3.5 h-3.5 text-violet-400 fill-violet-400" />
+            <span className="truncate">{messages.find(m => m.isPinned)?.text}</span>
+          </div>
+          <span className="text-[10px] text-violet-400/70 shrink-0">ข้อความปักหมุด</span>
+        </div>
+      )}
+
+      {/* Message List */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {filteredMessages.map((msg) => (
+          <div 
+            key={msg.id} 
+            className={`flex flex-col ${msg.sender === 'me' ? 'items-end' : 'items-start'} group`}
+          >
+            <div className="flex items-center gap-1.5 max-w-[80%]">
+              {msg.sender === 'me' && (
+                <div className="hidden group-hover:flex items-center gap-1">
+                  <button onClick={() => togglePin(msg.id)} className="p-1 hover:text-amber-400"><Pin className="w-3 h-3" /></button>
+                  <button onClick={() => deleteMsg(msg.id)} className="p-1 hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+                </div>
+              )}
+              
+              <div className={`p-3 rounded-2xl text-xs relative ${
+                msg.sender === 'me' 
+                  ? `${accentBg} text-white rounded-tr-none shadow-md` 
+                  : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700/50'
+              }`}>
+                {msg.text}
+                {msg.isPinned && <Pin className="w-3 h-3 text-amber-300 fill-amber-300 inline-block ml-1.5" />}
+              </div>
+
+              {msg.sender !== 'me' && (
+                <div className="hidden group-hover:flex items-center gap-1">
+                  <button onClick={() => togglePin(msg.id)} className="p-1 hover:text-amber-400"><Pin className="w-3 h-3" /></button>
+                </div>
+              )}
+            </div>
+            <span className="text-[9px] text-slate-500 mt-1 px-1">{msg.time}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Input Box */}
+      <div className="p-3 border-t border-slate-800 bg-slate-950/60 flex items-center gap-2">
+        <button className="p-2 text-slate-400 hover:text-violet-400"><Image className="w-4 h-4" /></button>
+        <button className="p-2 text-slate-400 hover:text-violet-400"><Paperclip className="w-4 h-4" /></button>
+        <input 
+          type="text" 
+          placeholder="พิมพ์ข้อความหวานๆ..." 
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          className="flex-1 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
+        />
+        <button onClick={handleSend} className={`p-2.5 rounded-xl ${accentBg} text-white hover:opacity-90 active:scale-95 transition-all`}>
+          <Send className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
 }
 
-/* PROFILE */
-function saveProfile(){
+// ==========================================
+// 3. MAP & LOCATION TRACKING PAGE
+// ==========================================
+function LocationView({ partner, user }) {
+  return (
+    <div className="space-y-4">
+      {/* Interactive Map Box (Mock UI) */}
+      <div className="relative w-full h-72 rounded-3xl overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center">
+        <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1.5px,transparent_1.5px)] [background-size:20px_20px] opacity-25" />
+        
+        {/* Partner Marker */}
+        <div className="relative z-10 flex flex-col items-center animate-bounce">
+          <div className="p-2 rounded-full bg-violet-600 text-white shadow-2xl shadow-violet-600/80 ring-4 ring-violet-400/30">
+            <MapPin className="w-6 h-6" />
+          </div>
+          <span className="mt-1 px-2.5 py-0.5 rounded-full bg-slate-950/90 text-[10px] text-violet-300 font-bold border border-violet-500/30 shadow-md">
+            {partner.name} ({partner.battery}%)
+          </span>
+        </div>
 
- const name=document.getElementById("name").value.trim();
- const status=document.getElementById("status").value.trim();
+        {/* Floating Controls */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2">
+          <button className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:bg-slate-800">
+            หยุดแชร์ตำแหน่ง 🛑
+          </button>
+        </div>
+      </div>
 
- localStorage.setItem(
-  "profile",
-  JSON.stringify({name,status})
- );
+      {/* Location History & Favorite Places */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+          <h3 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <Clock className="w-4 h-4 text-blue-400" /> ประวัติสถานที่วันนี้
+          </h3>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between p-2 rounded-xl bg-slate-800/40">
+              <span>🏢 ออฟฟิศ (ที่ทำงาน)</span>
+              <span className="text-slate-400">08:30 - 17:00 น.</span>
+            </div>
+            <div className="flex justify-between p-2 rounded-xl bg-slate-800/40">
+              <span>🛍️ สยามพารากอน</span>
+              <span className="text-violet-400 font-bold">ปัจจุบัน</span>
+            </div>
+          </div>
+        </div>
 
- document.getElementById("welcome").textContent=
-  `สวัสดี ${name||"👋"}`;
-
- document.getElementById("profileResult").innerHTML=
- `
- <div class="profile">
-  <div class="avatar">👤</div>
-  <div>
-   <h2>${safe(name||"ผู้ใช้")}</h2>
-   <p>${safe(status||"ไม่มีสถานะ")}</p>
-  </div>
- </div>
- `;
+        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+          <h3 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+            <Heart className="w-4 h-4 text-pink-400" /> สถานที่โปรดของเรา
+          </h3>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between items-center p-2 rounded-xl bg-slate-800/40">
+              <span>☕ คาเฟ่ร้านแรกที่เจอกัน</span>
+              <button className="text-[10px] text-blue-400 hover:underline">นำทาง</button>
+            </div>
+            <div className="flex justify-between items-center p-2 rounded-xl bg-slate-800/40">
+              <span>🏠 คอนโดของเรา</span>
+              <button className="text-[10px] text-blue-400 hover:underline">นำทาง</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-/* SECURITY */
-function safe(text){
- return String(text)
- .replaceAll("&","&amp;")
- .replaceAll("<","&lt;")
- .replaceAll(">","&gt;")
- .replaceAll('"',"&quot;")
- .replaceAll("'","&#039;");
+// ==========================================
+// 5, 6. CALENDAR & SCHEDULE & COUNTDOWN
+// ==========================================
+function CalendarView({ accentBg }) {
+  const [todos, setTodos] = useState([
+    { id: 1, text: 'ซื้อตั๋วหนังตลกวันเสาร์', done: true },
+    { id: 2, text: 'จองร้านอาหารวันครบรอบ', done: false },
+  ]);
+  const [newTodo, setNewTodo] = useState('');
+
+  const toggleTodo = (id) => {
+    setTodos(todos.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  };
+
+  const addTodo = () => {
+    if (!newTodo.trim()) return;
+    setTodos([...todos, { id: Date.now(), text: newTodo, done: false }]);
+    setNewTodo('');
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Event Countdown */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <CountdownCard title="วันครบรอบ 3 ปี 💖" date="14 กุมภาพันธ์ 2027" days="146" />
+        <CountdownCard title="ทริปเที่ยวญี่ปุ่น ✈️" date="10 พฤศจิกายน 2026" days="50" />
+        <CountdownCard title="วันเกิดแฟน 🎂" date="25 ธันวาคม 2026" days="95" />
+      </div>
+
+      {/* Shared To-Do List */}
+      <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+        <h3 className="text-sm font-bold text-slate-200 flex items-center gap-2">
+          <ListTodo className="w-4 h-4 text-violet-400" /> รายการสิ่งที่ต้องทำร่วมกัน (Shared To-Do)
+        </h3>
+
+        <div className="flex gap-2">
+          <input 
+            type="text" 
+            placeholder="เพิ่มงานใหม่ที่ต้องทำด้วยกัน..." 
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            className="flex-1 bg-slate-800/80 border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
+          />
+          <button onClick={addTodo} className={`px-4 py-2 rounded-xl ${accentBg} text-xs font-bold text-white hover:opacity-90`}>
+            เพิ่ม
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          {todos.map((todo) => (
+            <div 
+              key={todo.id} 
+              onClick={() => toggleTodo(todo.id)}
+              className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                todo.done 
+                  ? 'bg-slate-950/40 border-slate-800 text-slate-500 line-through' 
+                  : 'bg-slate-800/50 border-slate-700/60 text-slate-200'
+              }`}
+            >
+              <span className="text-xs">{todo.text}</span>
+              <CheckSquare className={`w-4 h-4 ${todo.done ? 'text-emerald-400' : 'text-slate-600'}`} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-/* CLOCK */
-setInterval(()=>{
-
- const now=new Date();
-
- document.getElementById("clock").textContent=
-  now.toLocaleTimeString("th-TH");
-
- document.getElementById("deviceClock").textContent=
-  now.toLocaleString("th-TH");
-
-},1000);
-
-/* START */
-document.getElementById("screen").textContent=
- `${screen.width} × ${screen.height}`;
-
-document.getElementById("browser").textContent=
- navigator.userAgent.split(")")[0]+")";
-
-const profile=JSON.parse(
- localStorage.getItem("profile")||"null"
-);
-
-if(profile){
- document.getElementById("name").value=profile.name||"";
- document.getElementById("status").value=profile.status||"";
- document.getElementById("welcome").textContent=
-  `สวัสดี ${profile.name||"👋"}`;
+function CountdownCard({ title, date, days }) {
+  return (
+    <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex justify-between items-center">
+      <div>
+        <p className="text-xs font-bold text-slate-200">{title}</p>
+        <p className="text-[10px] text-slate-400 mt-0.5">{date}</p>
+      </div>
+      <div className="text-right">
+        <span className="text-lg font-black text-violet-400">{days}</span>
+        <span className="text-[10px] text-slate-500 block">วัน</span>
+      </div>
+    </div>
+  );
 }
 
-renderChat();
-renderFriends();
-renderTodos();
-renderNotes();
-renderEvents();
-updateScore();
-battery();
+// ==========================================
+// 7. NOTES PAGE
+// ==========================================
+function NotesView({ accentBg }) {
+  const [notes, setNotes] = useState([
+    { id: 1, title: 'รหัส WiFi คอนโด', body: 'LoveUs2026Password', category: 'ส่วนตัว', isPinned: true },
+    { id: 2, title: 'ของที่แฟนอยากได้วันเกิด', body: 'หูฟังสีม่วง / กระเป๋าเป้', category: 'ของขวัญ', isPinned: false },
+  ]);
 
-</script>
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-sm font-bold text-slate-200">สมุดโน้ตของเรา</h3>
+        <button className={`px-3 py-1.5 rounded-xl ${accentBg} text-xs font-bold text-white flex items-center gap-1`}>
+          <Plus className="w-3.5 h-3.5" /> เขียนโน้ตใหม่
+        </button>
+      </div>
 
-</body>
-</html>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {notes.map((n) => (
+          <div key={n.id} className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2 relative">
+            <div className="flex justify-between items-start">
+              <span className="text-xs font-bold text-slate-200">{n.title}</span>
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">{n.category}</span>
+            </div>
+            <p className="text-xs text-slate-400">{n.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 8. ENTERTAINMENT & GAMES PAGE
+// ==========================================
+function GamesView({ coins, setCoins, level, setLevel }) {
+  const [decisionResult, setDecisionResult] = useState('');
+
+  const foodList = ['ชาบู 🍲', 'ส้มตำ 🌶️', 'อาหารญี่ปุ่น 🍣', 'เบอร์เกอร์ 🍔', 'ผัดไทย 🍝'];
+
+  const spinFood = () => {
+    const random = foodList[Math.floor(Math.random() * foodList.length)];
+    setDecisionResult(random);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Header */}
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500/20 to-violet-600/20 border border-amber-500/30 flex justify-between items-center">
+        <div>
+          <span className="text-xs font-bold text-amber-300">Level {level} Couple Power</span>
+          <h2 className="text-xl font-extrabold text-white">สะสมเหรียญความรัก</h2>
+        </div>
+        <div className="text-right">
+          <span className="text-2xl font-black text-amber-400">{coins} 🪙</span>
+        </div>
+      </div>
+
+      {/* Decision Wheel */}
+      <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 text-center space-y-4">
+        <h3 className="text-xs font-bold text-slate-300 flex items-center justify-center gap-1.5">
+          <Utensils className="w-4 h-4 text-violet-400" /> วงล้อตัดสินใจ "วันนี้กินอะไรดี?"
+        </h3>
+
+        {decisionResult && (
+          <div className="p-4 rounded-xl bg-violet-600/20 border border-violet-500/40 text-lg font-bold text-violet-300 animate-bounce">
+            คำตอบคือ: {decisionResult}
+          </div>
+        )}
+
+        <button 
+          onClick={spinFood}
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 text-xs font-bold text-white shadow-lg active:scale-95 transition-all"
+        >
+          หมุนวงล้อสุ่มเลย!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ==========================================
+// 10. SAFETY & PRIVACY SETTINGS PAGE
+// ==========================================
+function SettingsView({ user, setUser, accentColor, setAccentColor, appPin, setAppPin }) {
+  const [newPin, setNewPin] = useState('');
+
+  return (
+    <div className="space-y-6">
+      {/* Profile Edit */}
+      <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+        <h3 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+          <User className="w-4 h-4 text-violet-400" /> โปรไฟล์ส่วนตัว
+        </h3>
+        <div className="space-y-3 text-xs">
+          <div>
+            <label className="text-slate-400 block mb-1">ชื่อที่แสดง</label>
+            <input 
+              type="text" 
+              value={user.name} 
+              onChange={(e) => setUser({ ...user, name: e.target.value })}
+              className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-slate-200 focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Security & PIN */}
+      <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
+        <h3 className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+          <Shield className="w-4 h-4 text-emerald-400" /> ความปลอดภัย & รหัส PIN
+        </h3>
+        <div className="space-y-3 text-xs">
+          <div className="flex justify-between items-center">
+            <span>รหัส PIN ปัจจุบัน</span>
+            <span className="font-mono font-bold text-violet-400">{appPin}</span>
+          </div>
+          <div className="flex gap-2">
+            <input 
+              type="password" 
+              maxLength={4} 
+              placeholder="PIN ใหม่ 4 หลัก" 
+              value={newPin}
+              onChange={(e) => setNewPin(e.target.value)}
+              className="flex-1 bg-slate-800 border border-slate-700 rounded-xl p-2 text-slate-200"
+            />
+            <button 
+              onClick={() => { if(newPin.length === 4) { setAppPin(newPin); setNewPin(''); alert('เปลี่ยน PIN สำเร็จ'); } }}
+              className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl"
+            >
+              อัปเดต
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Theme Accent Picker */}
+      <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+        <h3 className="text-xs font-bold text-slate-300">เปลี่ยนสีไฮไลต์ (Accent Color)</h3>
+        <div className="flex gap-3">
+          <button onClick={() => setAccentColor('violet')} className="w-8 h-8 rounded-full bg-violet-600 ring-2 ring-white/20" />
+          <button onClick={() => setAccentColor('cyan')} className="w-8 h-8 rounded-full bg-cyan-600 ring-2 ring-white/20" />
+          <button onClick={() => setAccentColor('indigo')} className="w-8 h-8 rounded-full bg-indigo-600 ring-2 ring-white/20" />
+        </div>
+      </div>
+    </div>
+  );
+}
