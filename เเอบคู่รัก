@@ -1,1 +1,599 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BlueMoon App</title>
 
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Arial,"Noto Sans Thai",sans-serif;
+  background:linear-gradient(135deg,#07152f,#321064);
+  color:white;
+  min-height:100vh;
+}
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:240px;
+  background:rgba(5,10,30,.85);
+  padding:25px 15px;
+  position:fixed;
+  height:100vh;
+  border-right:1px solid #ffffff18;
+}
+.logo{
+  font-size:25px;
+  font-weight:bold;
+  text-align:center;
+  margin-bottom:30px;
+}
+.logo span{color:#8b7cff}
+.nav button{
+  width:100%;
+  border:0;
+  background:transparent;
+  color:#ddd;
+  padding:14px;
+  text-align:left;
+  border-radius:12px;
+  margin-bottom:7px;
+  cursor:pointer;
+  font-size:15px;
+}
+.nav button:hover,.nav button.active{
+  background:linear-gradient(90deg,#5c4cff,#8b4dff);
+  color:white;
+}
+.main{
+  margin-left:240px;
+  width:calc(100% - 240px);
+  padding:25px;
+}
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+}
+.card{
+  background:rgba(255,255,255,.08);
+  border:1px solid #ffffff12;
+  backdrop-filter:blur(15px);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 10px 30px #0003;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:15px;
+}
+.stat{
+  padding:20px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#2947c7,#773fd1);
+}
+.stat h2{font-size:28px;margin-top:8px}
+button,.btn{
+  background:linear-gradient(135deg,#5b4cff,#9b4dff);
+  color:white;
+  border:0;
+  padding:11px 16px;
+  border-radius:10px;
+  cursor:pointer;
+}
+input,textarea,select{
+  width:100%;
+  padding:12px;
+  border:1px solid #ffffff20;
+  background:#101936;
+  color:white;
+  border-radius:10px;
+  margin:7px 0;
+}
+textarea{min-height:100px}
+.item{
+  background:#ffffff09;
+  padding:14px;
+  border-radius:12px;
+  margin:8px 0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.page{display:none}
+.page.active{display:block}
+.avatar{
+  width:55px;height:55px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#4d5cff,#a34cff);
+  font-size:25px;
+}
+.profile{
+  display:flex;
+  gap:15px;
+  align-items:center;
+}
+.chat{
+  height:350px;
+  overflow:auto;
+  padding:10px;
+  background:#080f25;
+  border-radius:15px;
+}
+.msg{
+  padding:10px 14px;
+  margin:8px;
+  max-width:75%;
+  border-radius:15px;
+  background:#292f50;
+}
+.me{
+  margin-left:auto;
+  background:#654cff;
+}
+.mobile-menu{display:none}
+
+@media(max-width:700px){
+ .sidebar{
+   display:none;
+   z-index:10;
+   width:240px;
+ }
+ .sidebar.show{display:block}
+ .main{
+   margin-left:0;
+   width:100%;
+   padding:15px;
+ }
+ .mobile-menu{
+   display:block;
+   font-size:22px;
+   background:none;
+   padding:5px;
+ }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar" id="sidebar">
+  <div class="logo">💙 Blue<span>Moon</span></div>
+
+  <div class="nav">
+    <button class="active" onclick="showPage('home',this)">🏠 หน้าหลัก</button>
+    <button onclick="showPage('chat',this)">💬 แชต</button>
+    <button onclick="showPage('friends',this)">👥 เพื่อน</button>
+    <button onclick="showPage('todo',this)">✅ To-do</button>
+    <button onclick="showPage('notes',this)">📝 โน้ต</button>
+    <button onclick="showPage('calendar',this)">📅 ปฏิทิน</button>
+    <button onclick="showPage('location',this)">📍 ตำแหน่ง</button>
+    <button onclick="showPage('device',this)">🔋 อุปกรณ์</button>
+    <button onclick="showPage('games',this)">🎮 เกม</button>
+    <button onclick="showPage('profile',this)">👤 โปรไฟล์</button>
+    <button onclick="toggleDark()">🌙 เปลี่ยนธีม</button>
+  </div>
+</aside>
+
+<main class="main">
+
+<div class="top">
+  <button class="mobile-menu" onclick="toggleMenu()">☰</button>
+  <h1 id="pageTitle">หน้าหลัก</h1>
+  <div>🔔 <span id="clock"></span></div>
+</div>
+
+<!-- HOME -->
+<section id="home" class="page active">
+
+<div class="card">
+  <div class="profile">
+    <div class="avatar">👤</div>
+    <div>
+      <h2>สวัสดี 👋</h2>
+      <p>ยินดีต้อนรับเข้าสู่ BlueMoon</p>
+    </div>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="stat">💬 ข้อความ<h2 id="msgCount">0</h2></div>
+  <div class="stat">👥 เพื่อน<h2 id="friendCount">3</h2></div>
+  <div class="stat">✅ งานวันนี้<h2 id="todoCount">0</h2></div>
+  <div class="stat">⭐ คะแนน<h2 id="points">120</h2></div>
+</div>
+
+<div class="card">
+<h2>⏳ Countdown</h2>
+<h1 id="countdown">00:00:00</h1>
+<br>
+<input type="datetime-local" id="dateInput">
+<button onclick="startCountdown()">เริ่มนับถอยหลัง</button>
+</div>
+
+</section>
+
+<!-- CHAT -->
+<section id="chat" class="page">
+<div class="card">
+<h2>💬 ห้องแชต</h2>
+<br>
+<div class="chat" id="chatBox">
+ <div class="msg">สวัสดี 👋</div>
+ <div class="msg">ยินดีต้อนรับเข้าสู่ห้องแชต</div>
+</div>
+<br>
+<input id="chatInput" placeholder="พิมพ์ข้อความ...">
+<button onclick="sendMessage()">ส่งข้อความ</button>
+</div>
+</section>
+
+<!-- FRIENDS -->
+<section id="friends" class="page">
+<div class="card">
+<h2>👥 เพื่อน</h2>
+<input id="friendInput" placeholder="ชื่อเพื่อน">
+<button onclick="addFriend()">เพิ่มเพื่อน</button>
+<div id="friendList"></div>
+</div>
+</section>
+
+<!-- TODO -->
+<section id="todo" class="page">
+<div class="card">
+<h2>✅ To-do List</h2>
+<input id="todoInput" placeholder="เพิ่มงานที่ต้องทำ">
+<button onclick="addTodo()">เพิ่มงาน</button>
+<div id="todoList"></div>
+</div>
+</section>
+
+<!-- NOTES -->
+<section id="notes" class="page">
+<div class="card">
+<h2>📝 โน้ต</h2>
+<input id="noteTitle" placeholder="หัวข้อ">
+<textarea id="noteText" placeholder="เขียนโน้ตของคุณ..."></textarea>
+<button onclick="saveNote()">บันทึกโน้ต</button>
+<div id="noteList"></div>
+</div>
+</section>
+
+<!-- CALENDAR -->
+<section id="calendar" class="page">
+<div class="card">
+<h2>📅 ปฏิทิน</h2>
+<input type="date" id="calendarDate">
+<input id="eventInput" placeholder="ชื่อกิจกรรม">
+<button onclick="addEvent()">เพิ่มกิจกรรม</button>
+<div id="eventList"></div>
+</div>
+</section>
+
+<!-- LOCATION -->
+<section id="location" class="page">
+<div class="card">
+<h2>📍 ตำแหน่งของฉัน</h2>
+<p>ระบบจะขออนุญาตจากเบราว์เซอร์ก่อนใช้ตำแหน่ง</p>
+<br>
+<button onclick="getLocation()">แชร์ตำแหน่งของฉัน</button>
+<p id="locationResult"></p>
+</div>
+</section>
+
+<!-- DEVICE -->
+<section id="device" class="page">
+<div class="card">
+<h2>🔋 ข้อมูลอุปกรณ์</h2>
+<div id="battery">กำลังตรวจสอบ...</div>
+<br>
+<p>🌐 Browser: <span id="browser"></span></p>
+<p>📱 หน้าจอ: <span id="screenSize"></span></p>
+<p>🕐 เวลาปัจจุบัน: <span id="deviceTime"></span></p>
+</div>
+</section>
+
+<!-- GAMES -->
+<section id="games" class="page">
+<div class="card">
+<h2>🎮 เกมทายเลข</h2>
+<p>ทายเลข 1–10</p>
+<input type="number" id="guess" min="1" max="10">
+<button onclick="guessNumber()">ทาย</button>
+<p id="gameResult"></p>
+</div>
+
+<div class="card">
+<h2>⭐ คะแนน</h2>
+<h1 id="gamePoints">120</h1>
+</div>
+</section>
+
+<!-- PROFILE -->
+<section id="profile" class="page">
+<div class="card">
+<h2>👤 โปรไฟล์</h2>
+<input id="profileName" placeholder="ชื่อของคุณ">
+<input id="profileStatus" placeholder="สถานะ">
+<button onclick="saveProfile()">บันทึกโปรไฟล์</button>
+<br><br>
+<div id="profileResult"></div>
+</div>
+</section>
+
+</main>
+</div>
+
+<script>
+let todos=JSON.parse(localStorage.getItem("todos")||"[]");
+let friends=JSON.parse(localStorage.getItem("friends")||'["เพื่อนคนที่ 1","เพื่อนคนที่ 2","เพื่อนคนที่ 3"]');
+let notes=JSON.parse(localStorage.getItem("notes")||"[]");
+let events=JSON.parse(localStorage.getItem("events")||"[]");
+let points=Number(localStorage.getItem("points")||120);
+
+function showPage(id,btn){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ if(btn)btn.classList.add("active");
+ document.getElementById("pageTitle").textContent=
+   btn ? btn.textContent.replace(/^[^\s]+\s/,"") : id;
+ renderAll();
+}
+
+function toggleMenu(){
+ document.getElementById("sidebar").classList.toggle("show");
+}
+
+function toggleDark(){
+ document.body.classList.toggle("light");
+}
+
+function sendMessage(){
+ const input=document.getElementById("chatInput");
+ if(!input.value.trim())return;
+ const div=document.createElement("div");
+ div.className="msg me";
+ div.textContent=input.value;
+ document.getElementById("chatBox").appendChild(div);
+ input.value="";
+ document.getElementById("msgCount").textContent=
+   document.querySelectorAll("#chatBox .msg").length;
+}
+
+function addFriend(){
+ const input=document.getElementById("friendInput");
+ if(!input.value.trim())return;
+ friends.push(input.value);
+ localStorage.setItem("friends",JSON.stringify(friends));
+ input.value="";
+ renderFriends();
+}
+
+function renderFriends(){
+ document.getElementById("friendList").innerHTML=
+ friends.map((x,i)=>`
+ <div class="item">👤 ${escapeHTML(x)}
+ <button onclick="deleteFriend(${i})">ลบ</button></div>`).join("");
+ document.getElementById("friendCount").textContent=friends.length;
+}
+
+function deleteFriend(i){
+ friends.splice(i,1);
+ localStorage.setItem("friends",JSON.stringify(friends));
+ renderFriends();
+}
+
+function addTodo(){
+ const input=document.getElementById("todoInput");
+ if(!input.value.trim())return;
+ todos.push({text:input.value,done:false});
+ localStorage.setItem("todos",JSON.stringify(todos));
+ input.value="";
+ renderTodos();
+}
+
+function renderTodos(){
+ document.getElementById("todoList").innerHTML=
+ todos.map((x,i)=>`
+ <div class="item">
+ <span style="${x.done?'text-decoration:line-through;opacity:.5':''}">
+ ${escapeHTML(x.text)}</span>
+ <span>
+ <button onclick="completeTodo(${i})">✓</button>
+ <button onclick="deleteTodo(${i})">ลบ</button>
+ </span>
+ </div>`).join("");
+ document.getElementById("todoCount").textContent=
+   todos.filter(x=>!x.done).length;
+}
+
+function completeTodo(i){
+ todos[i].done=!todos[i].done;
+ localStorage.setItem("todos",JSON.stringify(todos));
+ renderTodos();
+}
+
+function deleteTodo(i){
+ todos.splice(i,1);
+ localStorage.setItem("todos",JSON.stringify(todos));
+ renderTodos();
+}
+
+function saveNote(){
+ const title=document.getElementById("noteTitle").value;
+ const text=document.getElementById("noteText").value;
+ if(!title&&!text)return;
+ notes.push({title,text});
+ localStorage.setItem("notes",JSON.stringify(notes));
+ document.getElementById("noteTitle").value="";
+ document.getElementById("noteText").value="";
+ renderNotes();
+}
+
+function renderNotes(){
+ document.getElementById("noteList").innerHTML=
+ notes.map((n,i)=>`
+ <div class="card">
+ <h3>${escapeHTML(n.title)}</h3>
+ <p>${escapeHTML(n.text)}</p>
+ <br><button onclick="deleteNote(${i})">ลบ</button>
+ </div>`).join("");
+}
+
+function deleteNote(i){
+ notes.splice(i,1);
+ localStorage.setItem("notes",JSON.stringify(notes));
+ renderNotes();
+}
+
+function addEvent(){
+ const date=document.getElementById("calendarDate").value;
+ const text=document.getElementById("eventInput").value;
+ if(!date||!text)return;
+ events.push({date,text});
+ localStorage.setItem("events",JSON.stringify(events));
+ document.getElementById("eventInput").value="";
+ renderEvents();
+}
+
+function renderEvents(){
+ document.getElementById("eventList").innerHTML=
+ events.map((e,i)=>`
+ <div class="item">📅 ${e.date} — ${escapeHTML(e.text)}
+ <button onclick="deleteEvent(${i})">ลบ</button></div>`).join("");
+}
+
+function deleteEvent(i){
+ events.splice(i,1);
+ localStorage.setItem("events",JSON.stringify(events));
+ renderEvents();
+}
+
+function getLocation(){
+ const result=document.getElementById("locationResult");
+ if(!navigator.geolocation){
+   result.textContent="เบราว์เซอร์ไม่รองรับ GPS";
+   return;
+ }
+ result.textContent="กำลังขอตำแหน่ง...";
+ navigator.geolocation.getCurrentPosition(
+  p=>{
+   result.innerHTML=
+   `ละติจูด: ${p.coords.latitude.toFixed(5)}<br>
+    ลองจิจูด: ${p.coords.longitude.toFixed(5)}<br>
+    ความแม่นยำประมาณ ${Math.round(p.coords.accuracy)} เมตร`;
+  },
+  ()=>{
+   result.textContent="ไม่สามารถเข้าถึงตำแหน่งได้";
+  }
+ );
+}
+
+async function getBattery(){
+ if(navigator.getBattery){
+  const b=await navigator.getBattery();
+  const update=()=>{
+   document.getElementById("battery").textContent=
+   `🔋 แบตเตอรี่ ${Math.round(b.level*100)}% — ${
+   b.charging?"กำลังชาร์จ":"ไม่ได้ชาร์จ"}`;
+  };
+  update();
+  b.addEventListener("levelchange",update);
+  b.addEventListener("chargingchange",update);
+ }else{
+  document.getElementById("battery").textContent=
+  "เบราว์เซอร์นี้ไม่เปิดเผยข้อมูลแบตเตอรี่";
+ }
+}
+
+function guessNumber(){
+ const answer=Math.floor(Math.random()*10)+1;
+ const guess=Number(document.getElementById("guess").value);
+ const result=document.getElementById("gameResult");
+ if(guess===answer){
+  points+=10;
+  localStorage.setItem("points",points);
+  result.textContent=`🎉 ถูกต้อง! เลขคือ ${answer} +10 คะแนน`;
+ }else{
+  result.textContent=`❌ ยังไม่ถูก เลขที่สุ่มคือ ${answer}`;
+ }
+ document.getElementById("gamePoints").textContent=points;
+ document.getElementById("points").textContent=points;
+}
+
+function saveProfile(){
+ const name=document.getElementById("profileName").value;
+ const status=document.getElementById("profileStatus").value;
+ localStorage.setItem("profile",JSON.stringify({name,status}));
+ document.getElementById("profileResult").innerHTML=
+ `<div class="profile">
+ <div class="avatar">👤</div>
+ <div><h2>${escapeHTML(name||"ผู้ใช้")}</h2>
+ <p>${escapeHTML(status||"ไม่มีสถานะ")}</p></div></div>`;
+}
+
+let timer;
+function startCountdown(){
+ clearInterval(timer);
+ const target=new Date(document.getElementById("dateInput").value).getTime();
+ timer=setInterval(()=>{
+  const diff=target-Date.now();
+  if(diff<=0){
+   clearInterval(timer);
+   document.getElementById("countdown").textContent="หมดเวลาแล้ว 🎉";
+   return;
+  }
+  const h=Math.floor(diff/3600000);
+  const m=Math.floor(diff%3600000/60000);
+  const s=Math.floor(diff%60000/1000);
+  document.getElementById("countdown").textContent=
+   `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+ },1000);
+}
+
+function escapeHTML(str){
+ return String(str).replace(/[&<>"']/g,m=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",
+ '"':"&quot;","'":"&#039;"
+ }[m]));
+}
+
+function renderAll(){
+ renderFriends();
+ renderTodos();
+ renderNotes();
+ renderEvents();
+ document.getElementById("points").textContent=points;
+ document.getElementById("gamePoints").textContent=points;
+}
+
+setInterval(()=>{
+ const now=new Date();
+ document.getElementById("clock").textContent=
+ now.toLocaleTimeString("th-TH");
+ document.getElementById("deviceTime").textContent=
+ now.toLocaleString("th-TH");
+},1000);
+
+document.getElementById("browser").textContent=navigator.userAgent;
+document.getElementById("screenSize").textContent=
+ `${screen.width} × ${screen.height}`;
+
+getBattery();
+renderAll();
+
+const savedProfile=JSON.parse(localStorage.getItem("profile")||"null");
+if(savedProfile){
+ document.getElementById("profileName").value=savedProfile.name||"";
+ document.getElementById("profileStatus").value=savedProfile.status||"";
+}
+</script>
+
+</body>
+</html>
